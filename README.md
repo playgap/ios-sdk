@@ -1,266 +1,285 @@
-# Playgap integration guide for publishers
-In this guide, we explain how you can monetise your offline gameplay with Playgap. As such, you would need to integrate our SDK, configure your integration, and create ad units. Upon completing the integration, before going live, you’d need to receive a unique application ID from our team: hello@playgap.io  
+# Playgap SDK
 
-Playgap software design prioritises stability, compatibility, transparency and customer needs. If you have any questions, our engineering and business teams would be happy to support you over email and messengers.  
+[![Version](https://img.shields.io/cocoapods/v/Playgap.svg?style=flat)](https://cocoapods.org/pods/Playgap)
+[![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager)
 
-## iOS SDK Integration
-Playgap supports iOS versions 11 and over in line with Apple’s deprecation roadmap. If your application is designed to support iOS 10 or earlier, get in touch with us. We support all mobile integrations compatible with Native iOS SDKs.  
 
-### Step 1. Obtain Playgap iOS SDK
-There are two options for obtaining Playgap iOS SDK (CocoaPods, .xcframework and git clone). Choose the one that is most suitable for your application.  
+The Playgap SDK enables mobile app developers to monetize offline gameplay. As such, you would need to set up your customer account, add your application to your Playgap account to receive your API Key, and integrate the SDK. If you have any questions about this process, please reach out to your account manager or drop a message at hello@playgap.io.
 
-**Option 1. Install with CocoaPods (recommended)**  
+Playgap software design prioritises stability, compatibility, transparency and customer needs. If you have any questions, our engineering and business teams would be happy to support you over email and messengers.
 
-This is the standard method preferred by most iOS developers. CocoaPods is the go-to package manager software and package maintainer for iOS. This guide assumes you are a CocoaPods user and have the necessary software installed on your system. To improve your understanding of the project, consider reading the official documentation.  
+## The Flow and User Experience
 
-If you haven't initialised a pod project already, navigate to the folder of your Xcode project in your preferred terminal and run the following command. Otherwise skip running the command and follow on reading.  
+The Playgap SDK offers a user experience which can be split into three parts: Preparation, Offline, and Online
+### Preparation
 
+Upon opening your application, users who often transition offline are connected to the internet for around 10 seconds. It's vital to use this window of opportunity to ensure that offline gameplay can be monetized.
+
+Use this window to initialize the Playgap SDK to prepare itself for monetizing this offline gameplay. It's recommended that the SDK is always initialized on application start to never miss out on this opportunity. Even in the event that the user launches the application offline, the Playgap SDK can be initialized without internet connection for a certain duration (24-48 hours) if it was previously initialized successfully.
+
+### Transition to Offline
+
+During offline gameplay, the Playgap SDK (once initialized successfully) can then be used to Load and Show ads to users.
+The APIs offered by the SDK allow for the game to have full discretion over the manner in which ads are displayed to the user. Whether the ad is user-initiated via a button, or the ad is an interstitial after a level completion, the Playgap SDK offers the flexibility for the game to decide if a Rewarded or an Interstitial flow is preferred.
+
+The Playgap SDK currently offers loading of Rewarded Ads, meaning that there is an expectation of a Reward to the user, and both flows reflect this. If you choose to show an ad through an Interstitial flow, the user must be rewarded for completing the view. Using the "Skip" functionality, users can choose to skip the ad and lose the reward or complete the view to receive the reward.
+
+The Playgap SDK will continue to allow Loading and Showing of advertisements at the applications discretion. The APIs allow for the number of claimed and unclaimed rewards obtained offline to be checked at any stage during gameplay. This allows for correct flexibility and limiting use of the SDK to the applications requirements.
+
+### Return to Online
+
+Once the user returns to online gameplay, the application has the opportunity to check the rewards that were accumulated offline, and present the user with a dialog to claim these rewards.
+The APIs offered allow the game to make a smart decision about when and where in the application flow the Playgap "Claim Rewards" Dialog is shown to the user.
+
+On this dialog, upon claiming the reward, the user will be briefly presented with an Appsheet associated with the ad they watched offline. Playgap counts the reward for the impression as claimed after this Appsheet is dismissed.
+
+**There are multiple options to issue rewards to users:**
+
+The Playgap SDK offers a clear set of IDs to match Impressions, to Rewarded Views, to Unclaimed Rewards. This offers a multitude of methods to tailor the user-rewarding experience correctly for your application.
+
+Below you'll find our recommended rewarding mechanisms which align with our expected use of the SDK.
+
+**Deliver Partial Reward on Video Completion (recommended):**
+
+The application will receive the identifier for the unclaimed reward from the Playgap SDK at the moment the video completes. It is recommended that the reward is divided into two parts, to cover both the offline and the subsequent online session. This results in the best user experience as the user is partially rewarded during their offline gameplay, which is consistent with their typical online experience.
+
+Example 1: A reward for viewing an online rewarded advertisement is 10 coins. For an offline user, this could be split into 5 coins delivered at video completion offline, and 5 coins delivered once the user returns online and claims them.
+
+Example 2: Where splitting the reward is not possible, the user may be granted one type of reward offline, for example a life, and another type of reward once the user is back online, for example a booster or 2 coins.
+
+**Deliver Full Reward on Claiming Reward:**
+
+Allow the user to store rewards during offline gameplay without granting the rewards until the user claims them online. This incetivises the user to return online sooner.
+
+Once the user returns online and claims the rewards, grant the full rewards.
+
+## Requirements
+
+| Platform | Minimum Swift Version | Installation | Status |
+| --- | --- | --- | --- |
+| iOS 12.0+ | 5.8 | [CocoaPods](#cocoapods), [Swift Package Manager](#swift-package-manager), [XCFrameworks](#xcframeworks) | Fully Tested |
+
+## Installation
+
+### CocoaPods
+
+[CocoaPods](https://cocoapods.org) is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate Alamofire into your Xcode project using CocoaPods, specify it in your `Podfile`:
+
+```ruby
+pod 'Playgap'
 ```
-pod init
+
+### Swift Package Manager
+
+The [Swift Package Manager](https://swift.org/package-manager/) is a tool for automating the distribution of Swift code and is integrated into the `swift` compiler. 
+
+Once you have your Swift package set up, adding Alamofire as a dependency is as easy as adding it to the `dependencies` value of your `Package.swift`.
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/playgap/ios-sdk.git", .upToNextMajor(from: "1.0.0"))
+]
 ```
 
-This command will create a new project for your pods as well as a workspace to contain both your project and pods project. You need to close Xcode and use the `.xcworkspace` file to open your project instead of `.xcproject`.  
+### XCFrameworks
 
-To install Playgap iOS SDK pod, add the following line to your podfile.  
+Each release includes `*.xcframework` framework binaries.
 
-```
-pod 'PlaygapSDK','1.0.0.0'
-```
+Simply drag the needed framework binaries to your **Frameworks, Libraries, and Embedded Content** section under your target's **General** tab.
 
-Then use the following command in the terminal application of your choice. Make sure you are still in your app's folder which now contains the workspace and both projects.  
-```
-pod install
-```
+## Integration
 
-Cocoapods will configure the downloaded pod and make it available to your Xcode project. At this point you are able to start using Playgap iOS SDK.  
-
-**Option 2. Download the .xcframework**  
-
-Download the .xcframework directly from the Playgap Github page under ‘Releases’ where our latest iOS SDK is normally available. This will require you to manually add the framework to your Xcode project.  
-
-Visit the ‘Releases’ page via the following link to download the latest (or a previous version) of the SDK. https://github.com/BloopAI/bloop/tags  
-
-Once the prebuilt `.xcframework` package is downloaded, you will need to add the framework to your Xcode project. You can do this by using `File > Project > Add Package` in the top navigation menu.  
-
-### Step 2. Update Info.plist  
+### Update Info.plist  
 Playgap ad network ID should be included in your app property list file (Info.plist) in order to comply with Apple's ad guidelines and have a reliable advertising experience.  
 
 1. Select Info.plist in the Project navigator in Xcode
 2. Click the (+) next to a key in the property list editor to add a new record
 3. The key should be named `SKAdNetworkItems`
 4. Chose ‘Array’ from the type dropdown since this record may contain multiple ad network ids in the future
-5. Create a dictionary item with just a single key-value (type string) item. Key name should be set to `SKAdNetworkIdentifier`, and the key value to: `playgap.skadnetwork`.
+5. Create a dictionary item with just a single key-value (type string) item. Key name should be set to `SKAdNetworkIdentifier`, and the key value to: `wbmgtnm2cz.skadnetwork`.
 
 You can also add SKAdNetworkIdentifier to your Info.plist, by using following definition
 *(NOTE: if SKAdNetworkItems is already included, then simply add the SKAdNetworkIdentifier for Playgap into the existing array)*
 
-```
+```xml
 <key>SKAdNetworkItems</key>
 <array>
    <dict>
       <key>SKAdNetworkIdentifier</key>
-      <string>playgap.skadnetwork</string>
+      <string>wbmgtnm2cz.skadnetwork</string>
    </dict>
 </array>
 ```
 
-*The ad network id for Playgap will be assigned by Apple as soon as preparations are complete. Note that the information will be delivered to you separately if you are a publisher partner.*
+## Usage
 
-**App Transport Security Settings**  
+### Initialize SDK
 
-It is highly recommended to extend the set of http requests the app is allowed to make to ensure that ad delivery doesn't get interrupted. With this configuration missing, Playgap's ability to deliver a complete and performant ad experience will be severely affected.  
+All of the SDK APIs require the SDK to successfully initialize prior to use. The SDK will not execute any functionality without being initialized, so it is always recommended to initialize the SDK as soon as possible once the application started.
 
-As a top level entry, please include a dictionary item with the key `NSAppTransportSecurity` and add a key-value pair under it where the key for this pair is `NSAllowsArbitraryLoads` and the value is type boolean set to `YES`.  
-
-You can read more about Application Transport Security (ATS) [here](https://developer.apple.com/library/prerelease/ios/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/doc/uid/TP40009251-SW33).  
-
-### Step 3. Set the Delegates
-Playgap iOS SDK will report significant events back to your application for tight interoperability. To be able to listen to these events and act accordingly in your application, set the following delegate functions in your ViewController. Make sure you import Playgap framework or Xcode will alert you about not being able to recognize the references.  
-
-```
+```swift
 import Playgap
-```
 
-To be able to implement your functions for Playgap SDK events your ViewController must implement both `ShowDelegate` and `ClaimRewardsDelegate` protocols.  
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate {
 
-```
-extension DemoViewController: ShowDelegate, ClaimRewardsDelegate {
-
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        PlaygapAds.initialize(apiKey: "YOUR_API_KEY") { error in
+            if let error {
+                print("Initialization Failed " + error.localizedDescription)
+            } else {
+                print("Initialization Completed")
+            }
+        }
+    }
 }
 ```
 
-The following code block lists the functions and their interface definitions.  
+### Load Rewarded Video Ad
 
-```
-//
-// Your call to show an available ad failed due to  the reported reason
-//
-func onShowFailed(error: PlaygapAds.ShowError) {
-  print("Show Failed " + error.localizedDescription)
-}
+In order to display an advertisment, one must first Load an ad object to be shown.
 
-// 
-// Your call to show an available ad resulted in success
-// The ad view has been rendered on screen
-// 
-func onShowImpression() {
-  
-}
+```swift
+var loadedAd: PlaygapAd?
 
-// 
-// The displayed ad started playback
-// 
-func onShowPlaybackEvent() {
-  
-}
+PlaygapAds.loadRewarded { result in
+    switch result {
+    case .success(let ad):
+        loadedAd = ad
+        print("Load successful triggered with id: \(ad.objectId)")
 
-// 
-// The displayed ad completed the playback.
-// 
-func onShowCompleted() {
-  
-}
-
-// 
-// Online reward screen has been displayed to the user.
-// 
-func onRewardScreenShown() {
-  
-}
-
-// 
-// Online reward screen failed to be displayed.
-// 
-func onRewardScreenFailed() {
-  
-}
-
-// 
-// The user click was redirected to the advertised application in the app store
-// 
-func onStoreClick() {
-  
-}
-
-// 
-// The user is rewarded from returning to the application after engaging with the app store. An error can return if this was due to a failure to open the app store.
-// 
-func onUserClaimedReward(_reward: Reward, error: Error?) {
-  
-}
-```
-### Step 4. Initialise the Playgap SDK
-```
-PlaygapAds.initialize(apiKey: "YOUR_API_KEY") { error in
-  if let error {
-    print("Initialization Failed " + error.localizedDescription)
-  } else {
-    print("Initialization Completed")
-  }
+    case .failure(let error):
+        print("Load failed: " +  error.localizedDescription)
+    }
 }
 ```
 
-### Step 5. Verify Your Integration
+### Display Loaded Ad
 
-Playgap iOS SDK and Platform integration requires manual verification. As soon as you feel comfortable with your app's Playgap SDK integration, please get in touch via hello@playgap.io  
+Displaying an Ad will result in a fullscreen advertisement showing on the user's device. The fullscreen ad contains in-app controls for the user to skip over the reward if they desire, and to control the volume and mute status of the advertisement. If the user attempts to skip the advertisement, they will be prompted that this will result in losing the reward if they continue.
+
+```swift
+guard let ad = loadedAd else { return }
+
+PlaygapAds.show(ad, from: {UIViewController}, delegate: {ShowDelegate})
+```
+
+### Claim Rewards
+
+The online reward mechanic displays the app sheet associated with the video ad, which is when you earn revenue as a publisher.
+
+```swift
+let unclaimedRewards = PlaygapAds.checkRewards()?.unclaimed ?? []
+print("Claim Rewards attempt triggered with \(unclaimedRewards.count) unclaimed rewards for IDs: \(unclaimedRewards)")
+
+PlaygapAds.claimRewards(from: {UIViewController}, delegate: {ClaimRewardsDelegate})
+```
+
+## Delegates
+
+Playgap iOS SDK will report significant events back to your application for tight interoperability. To be able to listen to these events and act accordingly in your application, set the following delegates.
+
+For more information on the identifiers outputted, such as impression ID or Reward ID, please refer to the "Recommendations" section.
+
+<details>
+  <summary><b>ShowDelegate</b></summary>
+
+  ```swift
+  extension DemoViewController: ShowDelegate {
+
+    func onShowFailed(error: Playgap.PlaygapAds.ShowError) {
+        print("Show failed triggered: " + error.localizedDescription)
+    }
+
+    func onShowImpression(impressionId: String) {
+        print("Impression triggered for id: \(impressionId)")
+    }
+
+    func onShowPlaybackEvent(_ event: Playgap.PlaybackEvent) {
+        print("Playback event triggered: " + event.rawValue)
+    }
+
+    func onShowCompleted(_ reward: Playgap.Reward) {
+        print("Show completed triggered with for id: \(reward.id)")
+    }
+}
+  ```
+</details>
+<details>
+  <summary><b>ClaimRewardsDelegate</b></summary>
+
+  ```swift
+  extension DemoViewController: ClaimRewardsDelegate {
+
+    func onRewardScreenShown() {
+        let unclaimedRewards = PlaygapAds.checkRewards()?.unclaimed ?? []
+        print("Claim Reward screen shown triggered with \(unclaimedRewards.count) unclaimed rewards for IDs: \(unclaimedRewards)")
+    }
+
+    func onRewardScreenFailed(_ error: PlaygapAds.ClaimRewardsError) {
+        print("Claim Reward screen failed to show triggered: " + error.localizedDescription)
+    }
+    
+    func onRewardScreenClosed() {
+        let claimedRewards = PlaygapAds.checkRewards()?.claimed ?? []
+        print("Claim Reward screen closed triggered with \(claimedRewards.count) total claimed rewards for IDs: \(claimedRewards)")
+    }
+
+    func onStoreClick() {
+        print("Store click triggered")
+    }
+
+    func onUserClaimedReward(_ reward: Playgap.Reward) {
+        print("User claimed reward triggered with id: \(reward.id)")
+    }
+}
+  ```
+</details>
+
+## Recommendations
+
+Below are some useful recommendations for utilizing features of the Playgap SDK to ensure that you can use the SDK with the greatest flexibility to maximize the effectiveness to your use cases.
+### Initialize the SDK Early Every User Session
+
+It's important to initialize the SDK early in the user session for every new user session. The SDK relies on being connected to the internet at a certain point in time, but will be able to handle required functions once successfully initialized.
+
+Upon opening your application, users that often transition offline are connected to the internet for around 10 seconds. This window of opportunity is vital to capitalize on to ensure that offline gameplay can be monetized.
+
+To capitalize correctly, the application must initialize the Playgap SDK to prepare itself for monetizing this offline gameplay. It's recommended that the SDK is always initialized on application start to never miss out on this opportunity. Even in the event that the user launches the application offline, the Playgap SDK can be initialized without internet connection for a certain duration (24-48 hours) if it was previously initialized successfully.
+
+### Show Ads in the Order they were Loaded In
+
+Playgap will always attempt to provide the maximum value for the ads shown within user session. It achieves this by loading the most valuable ads as soon as possible.
+
+It is possible your integration requires both loading and showing multiple ads in row. This behavior is covered by the SDK, but it is important to prioritize displaying ads in the correct order, as this can lead to the best monetisation outcomes.
+
+### How ID Tracking Works
+
+The Playgap SDK outputs certain identifiers on:
+- The Loaded Playgap Ad => Object ID
+- The Impression once the ad is shown => Impression ID
+- The Reward collected offline when the ad completes => Reward ID
+    - At this stage, the Playgap SDK considers this an "Unclaimed" Reward
+- The Claimed Reward once the user returns online => Reward ID
+    - At this stage, the Playgap SDK considers this a "Claimed" Reward
+
+All of these IDs will be identical at the different stages of the ad lifecycle, and are exposed via the SDK APIs. These can be used for any purpose, such as aligned event tracking, fraud prevention, or unique rewarding solutions.
+
+The PlaygapAds.checkRewards API can used to check both claimed and unclaimed rewards:
+- Claimed rewards are all of the Reward IDs the user has received since the most recent update of the Playgap SDK
+- Unclaimed rewards are all of the rewards from advertisements which have not yet been claimed from the Claim Rewards Dialog
+
+## Verify Your Integration
+
+Playgap iOS SDK and Platform integration requires manual verification. As soon as you feel comfortable with your app's Playgap SDK integration, please get in touch via hello@playgap.io
 
 **Integrate with Objective-C**  
 Playgap iOS SDK has been developed with the Swift language but it supports operation in Objective-C applications completely. If your application is developed using Objective-C as a software language please follow the additional steps below to enable support.  
 
-## Change Log
-### SDK
-*Stable release version 1.0.0 of Playgap iOS SDK is scheduled for release on September 1st, 2023. Playgap follows a three figure and mark naming convention for versioning. New SDK versions will be made available as alpha, beta and rc (release candidate) before the stable release.*  
-
-**v.1.0.0-rc**  
-- MMP integrations have been activated (Appsflyer, Adjust).
-- You can now use test mode configuration to receive test ads.
-- SDK API revised for standardisation.
-- App lifecycle events are now supported, implementing delegates is possible.  
-
-**Platform**  
-You can follow changes to Playgap Platform under this topic. Change sets are labelled by date.  
-
-**2023-08-01**  
-- Publisher and Advertiser reporting is now available for configuration. Visit your platform page to make over the air changes to your application’s ad configuration.
-- Cross promo ads are now offered as an option when creating ads.
-- It’s now possible to mark your ads as eligible for intelligent ad selection to take advantage of Playgap’s new delivery ML model.
-
-## Ad Units
-### Rewarded Video
-Playgap Rewarded Video ad format has been designed to support offline connectivity and displaying ads during offline sessions. Although the ad format shares the basic principles of a standard rewarded video ad, it has distinctive properties to set it apart from its online counterparts.  
-Playgap Rewarded Videos, displayed when offline, do not support clickthrough actions since the user won’t be able to reach Apple App Store or websites while offline. Instead, Playgap SDK renders the video offline and carries the app sheet online. It is possible to display multiple video ads during the offline session as long as you have pre-cached enough ads when the user was online.  
-
-In the event of connection status change to online, Playgap SDK detects the switch automatically and displays a half screen prompt to the user, welcoming the user back online and reminding them to claim their rewards for the video ads they watched offline. Each online ‘claim reward button’ refers to a single specific reward and, on tap, it displays the Apple App Store sheet related to the ad that the user watched offline. The app sheet gives the user a chance to install the application shown in the ad. As such, the user watches the ad offline and views its associated app sheet once online.  
-
-The rewarding process is handled by the developer and should be implemented in the respective delegate function which will be called right after the user completes its interaction with the Apple App Store sheet. Developers have two options for issuing rewards. The first option is to issue the reward once the user is back online. The second option is to give a portion of the reward offline upon completion of the view and give the remaining portion online (read more on partial rewards below). It is essential that a portion of the reward is carried over online for the user to be able to view the app sheet associated with the ad.  
-
-**Displaying a Rewarded Video Ad**  
-Being able to display a rewarded video ad requires loading available ads into the local cache of the application. Playgap SDK expects the application developer to make an explicit call to the loadRewarded function to start the caching process.  
-The following code snippet exhibits the bare minimum implementation of the required functionality:  
-
-```
-var loadedAd: PlaygapAd?
-
-PlaygapAds.loadRewarded { result in
-switch result {
-      		case .success(let ad):
-                print("Load successful")
-                self.loadedAd = ad
-            case .failure(let error):
-                print("Load failed: " +  error.localizedDescription)
-                break
-            }
- }
-```
-Keeping a reference to the loaded ad is optional but in general it is a good idea to be able to access it ViewController wide so that you can use it to show an ad in any sub function.  
-
-The above code snippet also displays how you can handle the result of the loading process. Regardless of the result of the process, you can use the following code snippet to display the loaded ad, since it will be checking the reference variable for null condition.  
-
-```
-guard let ad = loadedAd else { 
-	// Handle the scenario in which the ad is not loaded yet
-return 
-}
-PlaygapAds.show(ad, from: self, delegate: self)
-```
-
-For the complete functionality, you are expected to implement necessary delegate functions. You can find the list of available delegates [here](http://playgap.io).  
-
-### Rewarded Video with Partial Reward
-Rewarded Video with a Partial Reward, although denoted individually, is mostly the same ad format as the Reward Video. But the experience of the end user changes with this ad format since the developer will be rewarding the user once when the offline video playback has been completed and once again when the user interacts with the online ‘claim reward’ button as in the scenario with the standard Rewarded Ad.  
-
-Rewarded Video with a Partial Reward has the exact same functionality and is implemented the same way as the Rewarded Video. The only distinction is that you are expected to handle the onShowCompleted delegate and implement the way you want to handle the first part of the reward.  
-
-Read [here](https://playgap.io) for Rewarded Video integration and find the list of delegates and its definitions [here](https://playgap.io)  
-
-### Interstitial with Reward
-As in the case of Rewarded Video with Partial Reward, Interstitial with Reward mimics the behaviour of a Rewarded Video ad. The implementation will be exactly the same as for the rewarded ad format and you will be handling the earned reward cases the same way. The only difference is that while rewarded video is user initiated, interstitials are developer-initiated.  
-
-To show an Interstitial with Reward follow the steps described in this section. Use the PlaygapAds.show method the moment you find suitable for video ad display instead of waiting for an explicit interaction from the user usually through a button.  
-
-Contact your partner manager for advice on the best of the 3 integration scenarios for your game, of reach out to hello@playgap.io  
-
-*The tailored path to showing an Interstitial with Reward is planned to be supported at the SDK API level in the near future.*  
 
 ## Test Your Integration
 Playgap Platform supports configuration of an application as being in test mode. While in test mode, your app will be receiving a constant flow of test ads for all three rewarded ad formats. You should not worry about the fill rate or completion process of the caching operation. Use this opportunity to test your Playgap integration end-to-end before deploying your updated application to the public.  
 
 Beware that, If you enable test mode for your application,  the actual ad campaign delivery to the users of the application will stop imminently and your application won’t be regarded as operational by the algorithm. This won’t only stop the ad delivery and cause revenue loss but also force the system to forget about all the learnings memorised for your application.  
 
-For security reasons the test mode enablement is not enabled in the application code and should be set to the desired value in your Playgap Dashboard. Reach out to your partner manager for help on how to start using the Platform Dashboard to configure your application for ad delivery.  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+For security reasons the test mode enablement is not enabled in the application code and should be set to the desired value in your Playgap Dashboard. Reach out to your partner manager for help on how to start using the Platform Dashboard to configure your application for ad delivery.
