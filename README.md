@@ -2,15 +2,34 @@
 
 [![Version](https://img.shields.io/cocoapods/v/Playgap.svg?style=flat)](https://cocoapods.org/pods/Playgap)
 [![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager)
+[![Downloads](https://img.shields.io/github/downloads/playgap/ios-sdk/total.svg)](https://cocoapods.org/pods/Playgap)
 
 
-The Playgap SDK enables mobile app developers to monetize offline gameplay. As such, you would need to set up your customer account, add your application to your Playgap account to receive your API Key, and integrate the SDK. If you have any questions about this process, please reach out to your account manager or drop a message at hello@playgap.io.
+The Playgap SDK enables mobile app developers to monetize offline gameplay via advertisements.
 
-Playgap software design prioritises stability, compatibility, transparency and customer needs. If you have any questions, our engineering and business teams would be happy to support you over email and messengers.
+Playgap software design prioritizes stability, compatibility, transparency and customer needs. If you have any questions, our engineering and business teams would be happy to support you over email and messengers via hello@playgap.io or through your account manager.
+
+## Test Your Integration
+
+For testing and integrating the Playgap SDK without setting up an account, use the Universal Testing API Key: `PlaygapTestID123`.
+
+This ID is configured with Test Mode enabled, meaning it will always send test-specific advertisements so that the integration within an application can be tested consistently with 100% fill, while also being separated from production reporting.
+
+Use this opportunity to understand how the Playgap SDK fits within your application flow, and how to best utilize it for your application use cases. All that is required is configuring a production API Key to swap this testing setup to a production setup.
+
+## Launch Your Integration
+
+To receive an API Key for your own application(s) to start monetising your offline gameplay:
+- Fill out the [Playgap Customer Signup Form](https://docs.google.com/forms/d/e/1FAIpQLScNPmxlOJrGPYSIyILDt7c2rtjdIBByo3TRsLVJ9z2tjuGeDg/viewform?usp=sf_link)
+- Follow the instructions sent to your configured email(s) about Adding Applications to the Playgap Network
+
+Applications configured within Playgap will always begin in Test Mode (equivalent behavior to the Universal Testing API Key), and can later be enabled for production advertisements through contacting Playgap.
+
+If you have any questions about this process, please reach out to your account manager or drop a message at hello@playgap.io.
 
 ## The Flow and User Experience
 
-The Playgap SDK offers a user experience which can be split into three parts: Preparation, Offline, and Online
+The Playgap SDK offers a user experience which can be split into three parts: Preparation, Transition to Offline, and Return to Online
 ### Preparation
 
 Upon opening your application, users who often transition offline are connected to the internet for around 10 seconds. It's vital to use this window of opportunity to ensure that offline gameplay can be monetized.
@@ -33,6 +52,8 @@ The APIs offered allow the game to make a smart decision about when and where in
 
 On this dialog, upon claiming the reward, the user will be briefly presented with an Appsheet associated with the ad they watched offline. Playgap counts the reward for the impression as claimed after this Appsheet is dismissed.
 
+We recommend that this dialog is displayed via the Claim Rewards API as soon as the connection is re-established for a user with unclaimed rewards.
+
 **There are multiple options to issue rewards to users:**
 
 The Playgap SDK offers a clear set of IDs to match Impressions, to Rewarded Views, to Unclaimed Rewards. This offers a multitude of methods to tailor the user-rewarding experience correctly for your application.
@@ -49,9 +70,13 @@ Example 2: Where splitting the reward is not possible, the user may be granted o
 
 **Deliver Full Reward on Claiming Reward:**
 
-Allow the user to store rewards during offline gameplay without granting the rewards until the user claims them online. This incetivises the user to return online sooner.
+Allow the user to store rewards during offline gameplay without granting the rewards until the user claims them online. This incentivises the user to return online sooner.
 
 Once the user returns online and claims the rewards, grant the full rewards.
+
+### Note about Connection
+
+The Playgap SDK is developed with offline-first approach. However, the SDK does not prohibit any of its flows to execute while connected to the internet. All of the flows explained above will work under the assumption that the user is considered offline while the advertisement is playing. The Playgap SDK will still expect the "Return to Online" flow to consider the rewards from the advertisement as claimed.
 
 ## Requirements
 
@@ -90,7 +115,7 @@ Simply drag the needed framework binaries to your **Frameworks, Libraries, and E
 ## Integration
 
 ### Update Info.plist  
-Playgap ad network ID should be included in your app property list file (Info.plist) in order to comply with Apple's ad guidelines and have a reliable advertising experience.  
+Playgap ad network ID is required to be included in your app property list file (Info.plist) in order to successfully initialize the Playgap SDK, to comply with Apple's ad guidelines, and have a reliable advertising experience.
 
 1. Select Info.plist in the Project navigator in Xcode
 2. Click the (+) next to a key in the property list editor to add a new record
@@ -137,7 +162,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 ### Load Rewarded Video Ad
 
-In order to display an advertisment, one must first Load an ad object to be shown.
+In order to display an advertisement, one must first Load an ad object to be shown.
 
 ```swift
 var loadedAd: PlaygapAd?
@@ -156,7 +181,7 @@ PlaygapAds.loadRewarded { result in
 
 ### Display Loaded Ad
 
-Displaying an Ad will result in a fullscreen advertisement showing on the user's device. The fullscreen ad contains in-app controls for the user to skip over the reward if they desire, and to control the volume and mute status of the advertisement. If the user attempts to skip the advertisement, they will be prompted that this will result in losing the reward if they continue.
+Displaying an Ad will result in a fullscreen advertisement showing on the user's device. This fullscreen ad contains in-app controls for the user to skip over the reward if they desire, and to control the volume and mute status of the advertisement. If the user attempts to skip the advertisement, they will be prompted that this will result in losing the reward if they continue.
 
 ```swift
 guard let ad = loadedAd else { return }
@@ -167,6 +192,12 @@ PlaygapAds.show(ad, from: {UIViewController}, delegate: {ShowDelegate})
 ### Claim Rewards
 
 The online reward mechanic displays the app sheet associated with the video ad, which is when you earn revenue as a publisher.
+
+It is only possible to successfully display the Claim Rewards Dialog while both:
+- Connection to a network is established
+- Unclaimed Rewards have been accumulated offline
+
+The number of unclaimed rewards can be checked via the Check Rewards API after the SDK has been initialized successfully.
 
 ```swift
 let unclaimedRewards = PlaygapAds.checkRewards()?.unclaimed ?? []
@@ -238,7 +269,8 @@ For more information on the identifiers outputted, such as impression ID or Rewa
 
 ## Recommendations
 
-Below are some useful recommendations for utilizing features of the Playgap SDK to ensure that you can use the SDK with the greatest flexibility to maximize the effectiveness to your use cases.
+Below are some useful recommendations for utilizing features of the Playgap SDK to ensure that you can use the SDK with the greatest flexibility to maximize the effectiveness of your use cases.
+
 ### Initialize the SDK Early Every User Session
 
 It's important to initialize the SDK early in the user session for every new user session. The SDK relies on being connected to the internet at a certain point in time, but will be able to handle required functions once successfully initialized.
@@ -247,9 +279,15 @@ Upon opening your application, users that often transition offline are connected
 
 To capitalize correctly, the application must initialize the Playgap SDK to prepare itself for monetizing this offline gameplay. It's recommended that the SDK is always initialized on application start to never miss out on this opportunity. Even in the event that the user launches the application offline, the Playgap SDK can be initialized without internet connection for a certain duration (24-48 hours) if it was previously initialized successfully.
 
+### Claim Rewards while Connection is Established
+
+Displaying users with the opportunity to install the ad while online is required to generate revenue. Therefore, it is important that the Claim Rewards Dialog is displayed to users when they have claimed rewards while offline, and while the connection to a network is established.
+
+The amount of unclaimed rewards can be accessed via the Check Rewards API after the SDK has been initialized successfully.
+
 ### Show Ads in the Order they were Loaded In
 
-Playgap will always attempt to provide the maximum value for the ads shown within user session. It achieves this by loading the most valuable ads as soon as possible.
+Playgap will always attempt to provide the maximum value for the ads shown within the user session. It achieves this by loading the most valuable ads as soon as possible.
 
 It is possible your integration requires both loading and showing multiple ads in row. This behavior is covered by the SDK, but it is important to prioritize displaying ads in the correct order, as this can lead to the best monetisation outcomes.
 
@@ -268,18 +306,3 @@ All of these IDs will be identical at the different stages of the ad lifecycle, 
 The PlaygapAds.checkRewards API can used to check both claimed and unclaimed rewards:
 - Claimed rewards are all of the Reward IDs the user has received since the most recent update of the Playgap SDK
 - Unclaimed rewards are all of the rewards from advertisements which have not yet been claimed from the Claim Rewards Dialog
-
-## Verify Your Integration
-
-Playgap iOS SDK and Platform integration requires manual verification. As soon as you feel comfortable with your app's Playgap SDK integration, please get in touch via hello@playgap.io
-
-**Integrate with Objective-C**  
-Playgap iOS SDK has been developed with the Swift language but it supports operation in Objective-C applications completely. If your application is developed using Objective-C as a software language please follow the additional steps below to enable support.  
-
-
-## Test Your Integration
-Playgap Platform supports configuration of an application as being in test mode. While in test mode, your app will be receiving a constant flow of test ads for all three rewarded ad formats. You should not worry about the fill rate or completion process of the caching operation. Use this opportunity to test your Playgap integration end-to-end before deploying your updated application to the public.  
-
-Beware that, If you enable test mode for your application,  the actual ad campaign delivery to the users of the application will stop imminently and your application won’t be regarded as operational by the algorithm. This won’t only stop the ad delivery and cause revenue loss but also force the system to forget about all the learnings memorised for your application.  
-
-For security reasons the test mode enablement is not enabled in the application code and should be set to the desired value in your Playgap Dashboard. Reach out to your partner manager for help on how to start using the Platform Dashboard to configure your application for ad delivery.
