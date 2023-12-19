@@ -27,21 +27,27 @@ Applications configured within Playgap will always begin in Test Mode (equivalen
 
 If you have any questions about this process, please reach out to your account manager or drop a message at hello@playgap.io.
 
+## Rewarded and Interstitial Formats
+
+You can show Playgap Ads in both Rewarded Ad surfacing points and Interstitial Ad surfacing points within the same application. This would cover both cases of User-Initiated and Application-Initiated Ads.
+
+In both cases, the user must receive a Reward. Using the "Skip" functionality, users can choose to skip the ad and lose the reward or complete the view to receive the reward.
+
+The APIs offered by the SDK allow for the game to have full discretion over the manner in which ads are displayed to the user. Whether the ad is user-initiated via a button, or the ad is an interstitial after a level completion, the Playgap SDK offers the flexibility for the application to achieve both simultaneously.
+
 ## The Flow and User Experience
 
 The Playgap SDK offers a user experience which can be split into three parts: Preparation, Transition to Offline, and Return to Online
+
 ### Preparation
 
 Upon opening your application, users who often transition offline are connected to the internet for around 10 seconds. It's vital to use this window of opportunity to ensure that offline gameplay can be monetized.
 
-Use this window to initialize the Playgap SDK to prepare itself for monetizing this offline gameplay. It's recommended that the SDK is always initialized on application start to never miss out on this opportunity. Even in the event that the user launches the application offline, the Playgap SDK can be initialized without internet connection for a certain duration (24-48 hours) if it was previously initialized successfully.
+Use this window of time to initialize the Playgap SDK to prepare itself for monetizing this offline gameplay. It's recommended that the SDK is always initialized on application start to never miss out on this opportunity. Even in the event that the user launches the application offline, the Playgap SDK can be initialized without internet connection after it was previously initialized successfully.
 
 ### Transition to Offline
 
-During offline gameplay, the Playgap SDK (once initialized successfully) can then be used to Load and Show ads to users.
-The APIs offered by the SDK allow for the game to have full discretion over the manner in which ads are displayed to the user. Whether the ad is user-initiated via a button, or the ad is an interstitial after a level completion, the Playgap SDK offers the flexibility for the game to decide if a Rewarded or an Interstitial flow is preferred.
-
-The Playgap SDK currently offers loading of Rewarded Ads, meaning that there is an expectation of a Reward to the user, and both flows reflect this. If you choose to show an ad through an Interstitial flow, the user must be rewarded for completing the view. Using the "Skip" functionality, users can choose to skip the ad and lose the reward or complete the view to receive the reward.
+During offline gameplay, the Playgap SDK can be used to Load and Show ads to users.
 
 The Playgap SDK will continue to allow Loading and Showing of advertisements at the applications discretion. The APIs allow for the number of claimed and unclaimed rewards obtained offline to be checked at any stage during gameplay. This allows for correct flexibility and limiting use of the SDK to the applications requirements.
 
@@ -52,7 +58,7 @@ The APIs offered allow the game to make a smart decision about when and where in
 
 On this dialog, upon claiming the reward, the user will be briefly presented with an Appsheet associated with the ad they watched offline. Playgap counts the reward for the impression as claimed after this Appsheet is dismissed.
 
-We recommend that this dialog is displayed via the Claim Rewards API as soon as the connection is re-established for a user with unclaimed rewards.
+We recommend that this dialog is displayed via the Claim Rewards API as soon as the connection is re-established for a user with unclaimed rewards. The Claim Rewards sheet can be launched whenever the user is connected to the internet. The SDK will not allow the Claim Rewards sheet to be opened without connection, so we recommend calling the Claim Rewards Screen whenever it's convenient during the application flow to maximise the amount of Rewards the User Claims.
 
 **There are multiple options to issue rewards to users:**
 
@@ -142,6 +148,8 @@ You can also add SKAdNetworkIdentifier to your Info.plist, by using following de
 
 All of the SDK APIs require the SDK to successfully initialize prior to use. The SDK will not execute any functionality without being initialized, so it is always recommended to initialize the SDK as soon as possible once the application started.
 
+Once the SDK has been initialized successfully once while connected to the internet, then it can be used to load and show advertisements, and even initialize in following user sessions without connection to the internet.
+
 ```swift
 import Playgap
 
@@ -163,6 +171,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 ### Load Rewarded Video Ad
 
 In order to display an advertisement, one must first Load an ad object to be shown.
+
+Multiple ads can be loaded simultaneously to handle different scenarios within your application, but an individual Playgap Ad object can only be shown once.
+
+The PlaygapAds.loadRewarded function should be used for both Rewarded and Rewarded Interstitial Formats.
 
 ```swift
 var loadedAd: PlaygapAd?
@@ -189,13 +201,15 @@ guard let ad = loadedAd else { return }
 PlaygapAds.show(ad, from: {UIViewController}, delegate: {ShowDelegate})
 ```
 
-### Claim Rewards
+### Check and Claim Rewards
 
 The online reward mechanic displays the app sheet associated with the video ad, which is when you earn revenue as a publisher.
 
 It is only possible to successfully display the Claim Rewards Dialog while both:
 - Connection to a network is established
 - Unclaimed Rewards have been accumulated offline
+
+The Claim Rewards screen can be shown whenever connection to the internet is available, even within application sessions where the SDK was initialized offline. The Claim Rewards sheet will not be shown if the user does not have a valid connection, so we recommend calling to Claim Rewards as frequently as possible where it fits within your application flow. This ensures that the user is rewarded as frequently as they should be.
 
 The number of unclaimed rewards can be checked via the Check Rewards API after the SDK has been initialized successfully.
 
