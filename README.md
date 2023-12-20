@@ -1,4 +1,4 @@
-# Playgap SDK
+# Playgap iOS SDK
 
 [![Version](https://img.shields.io/cocoapods/v/Playgap.svg?style=flat)](https://cocoapods.org/pods/Playgap)
 [![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager)
@@ -8,6 +8,11 @@
 The Playgap SDK enables mobile app developers to monetize offline gameplay via advertisements.
 
 Playgap software design prioritizes stability, compatibility, transparency and customer needs. If you have any questions, our engineering and business teams would be happy to support you over email and messengers via hello@playgap.io or through your account manager.
+
+Check out all of our supported plaforms:
+- [Unity](https://github.com/playgap/unity-plugin)
+- [iOS](https://github.com/playgap/ios-sdk)
+- Android (under construction)
 
 ## Test Your Integration
 
@@ -19,9 +24,9 @@ Use this opportunity to understand how the Playgap SDK fits within your applicat
 
 ## Launch Your Integration
 
-To receive an API Key for your own application(s) to start monetising your offline gameplay:
-- Fill out the [Playgap Customer Signup Form](https://docs.google.com/forms/d/e/1FAIpQLScNPmxlOJrGPYSIyILDt7c2rtjdIBByo3TRsLVJ9z2tjuGeDg/viewform?usp=sf_link)
-- Follow the instructions sent to your configured email(s) about Adding Applications to the Playgap Network
+To receive an API Key for your own application(s) to start monetising your offline gameplay, either:
+- Reach out to your Account Manager at Playgap
+- Or; Fill out the [Playgap Customer Signup Form](https://docs.google.com/forms/d/e/1FAIpQLScNPmxlOJrGPYSIyILDt7c2rtjdIBByo3TRsLVJ9z2tjuGeDg/viewform?usp=sf_link) and following the instructions sent to your configured email(s)
 
 Applications configured within Playgap will always begin in Test Mode (equivalent behavior to the Universal Testing API Key), and can later be enabled for production advertisements through contacting Playgap.
 
