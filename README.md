@@ -229,6 +229,12 @@ PlaygapAds.claimRewards(from: {UIViewController}, delegate: {ClaimRewardsDelegat
 
 Playgap iOS SDK will report significant events back to your application for tight interoperability. To be able to listen to these events and act accordingly in your application, set the following delegates.
 
+- `onShowFailed` will trigger when a call to Show is unable to display or continue displaying an advertisment either before or during ad playback. It will return a `PlagapAds.ShowError` with a readable description to understand the failure reason, and the user will either remain or return back to the application.
+- `onShowImpression` will trigger when an ad is successfully to be shown on the device.
+- `onShowPlaybackEvent` will trigger during distinct points during ad playback: Start, First Quartile, Midpoint, and Third Quartile.
+- `onShowSkipped` will trigger when the user opts to skip ad playback via the Skip button during ad playback, and the user is returned to the application.
+- `onShowCompleted` will trigger when the entire ad (including video and interactive components) has successfully completed, and the user is returned to the application.
+
 For more information on the identifiers outputted, such as impression ID or Reward ID, please refer to the "Recommendations" section.
 
 <details>
@@ -247,6 +253,10 @@ For more information on the identifiers outputted, such as impression ID or Rewa
 
     func onShowPlaybackEvent(_ event: Playgap.PlaybackEvent) {
         print("Playback event triggered: " + event.rawValue)
+    }
+
+    func onShowSkipped() {
+        print("Show skipped triggered")
     }
 
     func onShowCompleted(_ reward: Playgap.Reward) {
