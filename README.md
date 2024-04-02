@@ -10,7 +10,7 @@ The Playgap SDK enables mobile app developers to monetize offline and online gam
 
 - [Unity](https://github.com/playgap/unity-plugin)
 - [iOS](https://github.com/playgap/ios-sdk)
-- Android (coming March 2024)
+- [Android](https://github.com/playgap/android-sdk)
 
 ## How to use the SDK
 
