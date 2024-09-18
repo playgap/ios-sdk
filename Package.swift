@@ -11,8 +11,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "Playgap",
-            url: "https://github.com/playgap/ios-sdk/releases/download/2.1.3/Playgap.xcframework.zip",
-            checksum: "323e513ffa66036004f0de7d923d41cb8edfc18ff67906a3a38a09bcc7c65432"
+            url: "https://github.com/playgap/ios-sdk/releases/download/2.1.4/Playgap.xcframework.zip",
+            checksum: "426bf53efc63d5730b6b73e39f4bb892dc8d925b36d33b55c83401aa41929ce3"
         )
     ]
 )
