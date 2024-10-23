@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name          = 'Playgap'
-    s.version       = '2.1.4'
+    s.version       = '3.0.0'
     s.summary       = 'Playgap iOS SDK'
 
     s.description   = <<-DESC
@@ -8,13 +8,13 @@ Pod::Spec.new do |s|
     DESC
 
     s.homepage      = 'https://playgap.io'
-    s.license       = { :type => 'Proprietary', :text => 'Copyright 2023 Playgap Ltd. All rights reserved.' }
+    s.license       = { :type => 'Proprietary', :text => 'Copyright 2024 Playgap Ltd. All rights reserved.' }
     s.author        = { 'Andrei' => 'andrei@playgap.io' }
     s.requires_arc  = true
     s.platform      = :ios
     s.source        = { 
-        http: "https://github.com/playgap/ios-sdk/releases/download/2.1.4/Playgap.xcframework.zip",
-        sha256: "426bf53efc63d5730b6b73e39f4bb892dc8d925b36d33b55c83401aa41929ce3"
+        http: "https://github.com/playgap/ios-sdk/releases/download/3.0.0/Playgap.xcframework.zip",
+        sha256: "9027f47ce669349fd9231b32f29dbcd58c12f6979187bd91b8d9df7b49d4212f"
     }
     s.ios.vendored_frameworks = 'Playgap.xcframework'
 
