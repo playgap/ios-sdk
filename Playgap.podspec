@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name          = 'Playgap'
-    s.version       = '5.4.0'
+    s.version       = '5.4.1'
     s.summary       = 'Playgap iOS SDK'
 
     s.description   = <<-DESC
@@ -13,8 +13,8 @@ Pod::Spec.new do |s|
     s.requires_arc  = true
     s.platform      = :ios
     s.source        = { 
-        http: "https://github.com/playgap/ios-sdk/releases/download/5.4.0/Playgap.xcframework.zip",
-        sha256: "c345b6bf880f87b0d061a913eed144ca253e172dcf008a485b3716c551d967d5"
+        http: "https://github.com/playgap/ios-sdk/releases/download/5.4.1/Playgap.xcframework.zip",
+        sha256: "b6f18adec0b0af71d7cfa2bda23052a73a840ed3b0d8eb5b62de25737a225dd3"
     }
     s.ios.vendored_frameworks = 'Playgap.xcframework'
 
