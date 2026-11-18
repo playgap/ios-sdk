@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "Playgap",
+    platforms: [.iOS(.v13)],
     products: [
         .library(
             name: "Playgap",
@@ -11,8 +12,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "Playgap",
-            url: "https://github.com/playgap/ios-sdk/releases/download/6.3.0/Playgap.xcframework.zip",
-            checksum: "bad72a34525ac40c13afa01606bd5d0417fd713441dd45d085756c28dea3c8fc"
+            url: "https://github.com/playgap/ios-sdk/releases/download/6.3.1/Playgap.xcframework.zip",
+            checksum: "e940caa3f4112955d56da256825b9b1cc7875f8a13826d32316cd678ae3c55a8"
         )
     ]
 )
